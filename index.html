@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab aw Calibration Engine</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --text-main: #333333;
+            --border: #e0e0e0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .input-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .result-box {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .result-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        .equation-display {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Water Activity Calibration</h1>
+    
+    <div class="input-group">
+        <label for="meterSelect">1. Select Lab Instrument</label>
+        <select id="meterSelect">
+            <option value="meter1">Labmaster neo</option>
+            <option value="meter2">Meter 2 (e.g., Aqualab)</option>
+            <option value="meter3">Meter 3 (e.g., Novasina)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="rawInput">2. Raw Experimental Reading (x)</label>
+        <input type="number" id="rawInput" step="0.001" placeholder="e.g. 0.250" autocomplete="off">
+    </div>
+
+    <div class="result-box">
+        <div class="result-label">True Calibrated aw</div>
+        <div class="result-value" id="trueValue">0.000</div>
+    </div>
+    
+    <div class="equation-display" id="equationDisplay">
+        Active Equation: Waiting for input...
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // CONFIGURATION ZONE: UPDATE YOUR ARRAYS HERE
+    // ==========================================
+    const meterData = {
+        meter1: {
+            name: "Labmaster neo",
+            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+            experimental: [0.1059, 0.3043, 0.4825, 0.7023, 0.9998] // Data you provided
+        },
+        meter2: {
+            name: "Meter 2",
+            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+            experimental: [0.11, 0.33, 0.53, 0.73, 0.97] // REPLACE WITH METER 2 DATA
+        },
+        meter3: {
+            name: "Meter 3",
+            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+            experimental: [0.11, 0.33, 0.53, 0.73, 0.97] // REPLACE WITH METER 3 DATA
+        }
+    };
+
+    // ==========================================
+    // ENGINE: DO NOT TOUCH BELOW THIS LINE
+    // ==========================================
+    
+    // Calculate Linear Regression (y = mx + c)
+    function calculateRegression(xArray, yArray) {
+        let n = yArray.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        
+        for (let i = 0; i < n; i++) {
+            sumX += xArray[i];
+            sumY += yArray[i];
+            sumXY += (xArray[i] * yArray[i]);
+            sumXX += (xArray[i] * xArray[i]);
+        }
+        
+        let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        let intercept = (sumY - slope * sumX) / n;
+        
+        return { m: slope, c: intercept };
+    }
+
+    const selectEl = document.getElementById('meterSelect');
+    const inputEl = document.getElementById('rawInput');
+    const resultEl = document.getElementById('trueValue');
+    const equationEl = document.getElementById('equationDisplay');
+
+    function updateCalculation() {
+        const selectedMeter = selectEl.value;
+        const rawValue = parseFloat(inputEl.value);
+        
+        // Get data for selected meter
+        const data = meterData[selectedMeter];
+        
+        // Experimental is X, Standard is Y
+        const regression = calculateRegression(data.experimental, data.standards);
+        
+        if (!isNaN(rawValue)) {
+            // y = mx + c
+            const trueAw = (regression.m * rawValue) + regression.c;
+            resultEl.textContent = trueAw.toFixed(3);
+            
+            // Format equation for display
+            const sign = regression.c >= 0 ? '+' : '-';
+            equationEl.textContent = `Active Equation: y = ${regression.m.toFixed(4)}x ${sign} ${Math.abs(regression.c).toFixed(4)}`;
+        } else {
+            resultEl.textContent = "0.000";
+            equationEl.textContent = "Enter a raw reading to begin.";
+        }
+    }
+
+    // Event Listeners for real-time updates
+    selectEl.addEventListener('change', updateCalculation);
+    inputEl.addEventListener('input', updateCalculation);
+    
+</script>
+</body>
+</html>
