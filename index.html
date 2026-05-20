@@ -1,205 +1,405 @@
+# Water Activity Meter Calibration Engine
+
+## Complete Professional HTML + JavaScript Code
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab aw Calibration Engine</title>
+    <title>Water Activity Meter Calibration</title>
+
     <style>
         :root {
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
-            --primary: #2c3e50;
-            --accent: #3498db;
+            --primary: #1f2937;
+            --accent: #2563eb;
             --text-main: #333333;
-            --border: #e0e0e0;
+            --border: #dcdcdc;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            background: var(--bg-color);
+            font-family: Arial, Helvetica, sans-serif;
         }
+
         .container {
+            width: 100%;
+            max-width: 650px;
             background: var(--card-bg);
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
-            max-width: 500px;
-            width: 100%;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
         }
+
         h1 {
-            color: var(--primary);
-            font-size: 1.5rem;
-            margin-top: 0;
             text-align: center;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 35px;
+            font-size: 28px;
         }
+
         .input-group {
             margin-bottom: 25px;
         }
+
         label {
             display: block;
+            margin-bottom: 10px;
             font-weight: 600;
-            margin-bottom: 8px;
             color: var(--primary);
-            font-size: 0.9rem;
         }
-        select, input {
+
+        select,
+        input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
+            border-radius: 8px;
+            font-size: 16px;
         }
-        select:focus, input:focus {
+
+        select:focus,
+        input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
+
         .result-box {
+            margin-top: 35px;
             background: var(--primary);
             color: white;
-            padding: 25px;
-            border-radius: 8px;
+            padding: 30px;
+            border-radius: 10px;
             text-align: center;
-            margin-top: 30px;
         }
-        .result-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
+
+        .result-title {
+            font-size: 14px;
             letter-spacing: 1px;
+            text-transform: uppercase;
             opacity: 0.8;
-            margin-bottom: 10px;
         }
+
         .result-value {
-            font-size: 2.5rem;
-            font-weight: 700;
+            margin-top: 10px;
+            font-size: 42px;
+            font-weight: bold;
             font-family: monospace;
         }
-        .equation-display {
-            font-size: 0.8rem;
+
+        .equation-box,
+        .stats-box {
+            margin-top: 25px;
+            padding: 18px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .equation-box p,
+        .stats-box p {
+            margin: 8px 0;
+            color: #374151;
+            font-size: 15px;
+        }
+
+        .footer-note {
+            margin-top: 25px;
             text-align: center;
-            margin-top: 15px;
-            color: #7f8c8d;
+            color: #6b7280;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Water Activity Calibration</h1>
-    
+
+    <h1>Water Activity Calibration Engine</h1>
+
     <div class="input-group">
-        <label for="meterSelect">1. Select Lab Instrument</label>
+        <label>Select Instrument</label>
+
         <select id="meterSelect">
-            <option value="meter1">Labmaster neo</option>
-            <option value="meter2">Meter 2 (e.g., Aqualab)</option>
-            <option value="meter3">Meter 3 (e.g., Novasina)</option>
+            <option value="labmaster">Labmaster Neo</option>
+            <option value="mastergreen">Master Green</option>
+            <option value="portable">Portable Meter</option>
         </select>
     </div>
 
     <div class="input-group">
-        <label for="rawInput">2. Raw Experimental Reading (x)</label>
-        <input type="number" id="rawInput" step="0.001" placeholder="e.g. 0.250" autocomplete="off">
+        <label>Raw Experimental Reading (x)</label>
+
+        <input
+            type="number"
+            id="rawInput"
+            step="0.001"
+            placeholder="Enter raw reading"
+        >
     </div>
 
     <div class="result-box">
-        <div class="result-label">True Calibrated aw</div>
-        <div class="result-value" id="trueValue">0.000</div>
+        <div class="result-title">True Calibrated aw</div>
+        <div class="result-value" id="resultValue">0.000</div>
     </div>
-    
-    <div class="equation-display" id="equationDisplay">
-        Active Equation: Waiting for input...
+
+    <div class="equation-box">
+        <p id="equationText">Equation will appear here</p>
     </div>
+
+    <div class="stats-box">
+        <p id="slopeText"></p>
+        <p id="interceptText"></p>
+    </div>
+
+    <div class="footer-note">
+        Calibration based on linear regression using Excel calibration standards.
+    </div>
+
 </div>
 
 <script>
-    // ==========================================
-    // CONFIGURATION ZONE: UPDATE YOUR ARRAYS HERE
-    // ==========================================
-    const meterData = {
-        meter1: {
-            name: "Labmaster neo",
-            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
-            experimental: [0.1059, 0.3043, 0.4825, 0.7023, 0.9998] // Data you provided
-        },
-        meter2: {
-            name: "Meter 2",
-            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
-            experimental: [0.11, 0.33, 0.53, 0.73, 0.97] // REPLACE WITH METER 2 DATA
-        },
-        meter3: {
-            name: "Meter 3",
-            standards: [0.11, 0.33, 0.53, 0.73, 0.97],
-            experimental: [0.11, 0.33, 0.53, 0.73, 0.97] // REPLACE WITH METER 3 DATA
-        }
+
+// =========================================================
+// CALIBRATION DATA FROM EXCEL SHEET
+// =========================================================
+// Formula used in Excel:
+// Average Experimental Reading = AVERAGE(Reading1, Reading2, Reading3)
+// Linear Regression Formula:
+// y = mx + c
+// where:
+// y = True Standard aw
+// x = Experimental Meter Reading
+// =========================================================
+
+const calibrationData = {
+
+    // =====================================================
+    // LABMASTER NEO
+    // =====================================================
+    labmaster: {
+        name: "Labmaster Neo",
+
+        standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+
+        readings: [
+            [0.1035, 0.1089, 0.1052],
+            [0.3022, 0.3096, 0.3011],
+            [0.4780, 0.4847, 0.4848],
+            [0.6989, 0.7037, 0.7042],
+            [0.9985, 0.9990, 1.0020]
+        ]
+    },
+
+    // =====================================================
+    // MASTER GREEN
+    // =====================================================
+    mastergreen: {
+        name: "Master Green",
+
+        standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+
+        readings: [
+            [0.100, 0.101, 0.095],
+            [0.243, 0.241, 0.240],
+            [0.415, 0.411, 0.413],
+            [0.654, 0.653, 0.655],
+            [0.853, 0.847, 0.875]
+        ]
+    },
+
+    // =====================================================
+    // PORTABLE METER
+    // =====================================================
+    portable: {
+        name: "Portable Meter",
+
+        standards: [0.11, 0.33, 0.53, 0.73, 0.97],
+
+        readings: [
+            [0.1065, 0.0750, 0.0770],
+            [0.2850, 0.2820, 0.2790],
+            [0.4570, 0.4570, 0.4620],
+            [0.7170, 0.7220, 0.7180],
+            [0.9190, 0.9610, 0.9540]
+        ]
+    }
+};
+
+// =========================================================
+// CALCULATE AVERAGE
+// Formula:
+// Average = (x1 + x2 + x3) / 3
+// =========================================================
+
+function calculateAverage(values) {
+
+    let total = 0;
+
+    for (let i = 0; i < values.length; i++) {
+        total += values[i];
+    }
+
+    return total / values.length;
+}
+
+// =========================================================
+// LINEAR REGRESSION CALCULATION
+// Formula:
+// m = [nΣxy - (Σx)(Σy)] / [nΣx² - (Σx)²]
+// c = [Σy - mΣx] / n
+// =========================================================
+
+function calculateRegression(xValues, yValues) {
+
+    const n = xValues.length;
+
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumXX = 0;
+
+    for (let i = 0; i < n; i++) {
+
+        sumX += xValues[i];
+        sumY += yValues[i];
+        sumXY += xValues[i] * yValues[i];
+        sumXX += xValues[i] * xValues[i];
+    }
+
+    const slope =
+        ((n * sumXY) - (sumX * sumY)) /
+        ((n * sumXX) - (sumX * sumX));
+
+    const intercept =
+        (sumY - (slope * sumX)) / n;
+
+    return {
+        slope,
+        intercept
     };
+}
 
-    // ==========================================
-    // ENGINE: DO NOT TOUCH BELOW THIS LINE
-    // ==========================================
-    
-    // Calculate Linear Regression (y = mx + c)
-    function calculateRegression(xArray, yArray) {
-        let n = yArray.length;
-        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-        
-        for (let i = 0; i < n; i++) {
-            sumX += xArray[i];
-            sumY += yArray[i];
-            sumXY += (xArray[i] * yArray[i]);
-            sumXX += (xArray[i] * xArray[i]);
-        }
-        
-        let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        let intercept = (sumY - slope * sumX) / n;
-        
-        return { m: slope, c: intercept };
+// =========================================================
+// DOM ELEMENTS
+// =========================================================
+
+const meterSelect = document.getElementById("meterSelect");
+const rawInput = document.getElementById("rawInput");
+const resultValue = document.getElementById("resultValue");
+const equationText = document.getElementById("equationText");
+const slopeText = document.getElementById("slopeText");
+const interceptText = document.getElementById("interceptText");
+
+// =========================================================
+// MAIN CALCULATION ENGINE
+// =========================================================
+
+function updateCalibration() {
+
+    const selectedMeter = meterSelect.value;
+    const rawReading = parseFloat(rawInput.value);
+
+    const meter = calibrationData[selectedMeter];
+
+    // Calculate average experimental readings
+    const experimentalAverages = meter.readings.map(readingSet => {
+        return calculateAverage(readingSet);
+    });
+
+    // Regression Calculation
+    const regression = calculateRegression(
+        experimentalAverages,
+        meter.standards
+    );
+
+    // Input Validation
+    // Water activity cannot exceed 1.0000
+
+    if (rawReading > 1) {
+
+        resultValue.textContent = "ERROR";
+
+        equationText.innerHTML = `
+            <strong style="color:red;">Invalid Input:</strong><br>
+            Water activity value cannot exceed 1.0000
+        `;
+
+        slopeText.textContent = "";
+        interceptText.textContent = "";
+
+        return;
     }
 
-    const selectEl = document.getElementById('meterSelect');
-    const inputEl = document.getElementById('rawInput');
-    const resultEl = document.getElementById('trueValue');
-    const equationEl = document.getElementById('equationDisplay');
+    // If user entered value
+    if (!isNaN(rawReading)) {
 
-    function updateCalculation() {
-        const selectedMeter = selectEl.value;
-        const rawValue = parseFloat(inputEl.value);
-        
-        // Get data for selected meter
-        const data = meterData[selectedMeter];
-        
-        // Experimental is X, Standard is Y
-        const regression = calculateRegression(data.experimental, data.standards);
-        
-        if (!isNaN(rawValue)) {
-            // y = mx + c
-            const trueAw = (regression.m * rawValue) + regression.c;
-            resultEl.textContent = trueAw.toFixed(3);
-            
-            // Format equation for display
-            const sign = regression.c >= 0 ? '+' : '-';
-            equationEl.textContent = `Active Equation: y = ${regression.m.toFixed(4)}x ${sign} ${Math.abs(regression.c).toFixed(4)}`;
-        } else {
-            resultEl.textContent = "0.000";
-            equationEl.textContent = "Enter a raw reading to begin.";
-        }
+        // Linear equation
+        // y = mx + c
+        const calibratedAw =
+            (regression.slope * rawReading) + regression.intercept;
+
+        resultValue.textContent = calibratedAw.toFixed(4);
+
+        const sign = regression.intercept >= 0 ? "+" : "-";
+
+        equationText.innerHTML = `
+            <strong>Regression Equation:</strong><br>
+            y = ${regression.slope.toFixed(6)}x
+            ${sign}
+            ${Math.abs(regression.intercept).toFixed(6)}
+        `;
+
+        slopeText.innerHTML = `
+            <strong>Slope (m):</strong>
+            ${regression.slope.toFixed(6)}
+        `;
+
+        interceptText.innerHTML = `
+            <strong>Intercept (c):</strong>
+            ${regression.intercept.toFixed(6)}
+        `;
+
     }
+    else {
 
-    // Event Listeners for real-time updates
-    selectEl.addEventListener('change', updateCalculation);
-    inputEl.addEventListener('input', updateCalculation);
-    
+        resultValue.textContent = "0.000";
+
+        equationText.textContent =
+            "Enter raw reading to start calibration.";
+
+        slopeText.textContent = "";
+        interceptText.textContent = "";
+    }
+}
+
+// =========================================================
+// EVENT LISTENERS
+// =========================================================
+
+meterSelect.addEventListener("change", updateCalibration);
+rawInput.addEventListener("input", updateCalibration);
+
+// =========================================================
+// INITIAL LOAD
+// =========================================================
+
+updateCalibration();
+
 </script>
+
 </body>
 </html>
