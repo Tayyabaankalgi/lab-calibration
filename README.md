@@ -1,6 +1,4 @@
-# ================================
 # Lab aw Calibration Engine
-# ================================
 
 ## Overview
 The Lab aw Calibration Engine is a lightweight and interactive web-based calibration tool designed for correcting raw water activity (aw) measurements obtained from laboratory instruments. The application uses linear regression models to convert experimental readings into accurate calibrated aw values in real time.
